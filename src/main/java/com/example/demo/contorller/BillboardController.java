@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 //import com.example.demo.Repo.AddressRepository;
 
+import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,50 +76,61 @@ public class BillboardController {
                          @RequestParam String address,
                          @RequestParam String price,
                          @RequestParam Long proId,
+                         @RequestParam String start,
+                         @RequestParam String end,
+                         HttpSession session,
                          Model model) {
+        if (start.length()==0||start.length()==0){
+            session.setAttribute("errorMessage","Error: fill in all fields");
+            return "redirect:/bulletin";
+        }
 
-        // Find all billboards and prototypes from database
+        LocalDate startDate = LocalDate.of(Integer.valueOf(start.substring(0,4)), Integer.valueOf(start.substring(5,7)), 1);
+        LocalDate endDate = LocalDate.of(Integer.valueOf(end.substring(0,4)), Integer.valueOf(end.substring(5,7)), 1);
+        if (endDate.isBefore(startDate)){
+            session.setAttribute("errorMessage","Finish date must be after start date");
+            return "redirect:/bulletin";
+        }
+
+        if (startDate.isBefore(LocalDate.now())){
+            session.setAttribute("errorMessage","Start date must be after current date");
+            return "redirect:/bulletin";
+        }
+
+
+
+
+
+        session.setAttribute("errorMessage","");
         Iterable<Billboard> billboards = billboardRepo.findAll();
         Iterable<Prototype> prototypes = prototypeRepo.findAll();
 
-        // Count the number of billboards that belong to the current user and have the same address
-        int num = 0;
-        for (Billboard billboard : billboards) {
-            if (billboard.getAddress().equals(address)) {
-                num++;
+        Optional<Prototype> prototypeOptional = prototypeRepo.findById(proId);
+        Prototype prototype = prototypeOptional.get();
+
+        for (Billboard bill:
+             prototype.list) {
+            System.out.println(bill.getEndDate1()+" "+bill.getStartDate1());
+            if((startDate.isAfter(bill.getStartDate1())&&startDate.isBefore(bill.getEndDate1()))||(endDate.isAfter(bill.getStartDate1())&&endDate.isBefore(bill.getEndDate1()))){
+                session.setAttribute("errorMessage","Your range intersects with another");
+                return "redirect:/bulletin";
             }
         }
 
-        // Set the start date based on the number of existing billboards with the same address
-        LocalDate startDate1 = LocalDate.now().withDayOfMonth(1);
-        if (num == 1) {
-            startDate1 = startDate1.plusMonths(1);
-        } else if (num == 2) {
-            startDate1 = startDate1.plusMonths(2);
-        }
-
-        // Set the end date based on the start date
-        LocalDate startDate2 = startDate1.plusMonths(1).withDayOfMonth(1);
-        LocalDate endDate2 = startDate2.plusMonths(1).withDayOfMonth(1);
-
-        // Check if the prototype has reached its maximum capacity
-        Optional<Prototype> prototypeOptional = prototypeRepo.findById(proId);
-        Prototype prototype = prototypeOptional.get();
         if (prototype.list.size() >= 3) {
-            model.addAttribute("errorMessage", "Максимальное количество мест зарезервировано");
+//            model.addAttribute("errorMessage", "Maximum number of seats reserved");
         } else {
             // Create a new billboard and add it to the prototype
-            String status = "manager";
+            String status = "onReview";
             boolean inWork = true;
-            Billboard billboard = new Billboard(address, price, status, startDate2, endDate2, user, inWork);
+            Billboard billboard = new Billboard(address, price, status, startDate, endDate, user, inWork);
             billboardRepo.save(billboard);
             prototype.list.add(billboard);
             prototypeRepo.save(prototype);
-            num++;
         }
 
         // Get the count of billboards that are in work and have the status "online"
-        String status = "online";
+//        String status = "o";
 
         return "redirect:/bulletin";
     }

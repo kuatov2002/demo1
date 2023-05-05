@@ -36,7 +36,7 @@ public class ManagerController {
         ArrayList<Billboard> managerBills=new ArrayList<>();
         for (Billboard bill:
              billboards) {
-            if(bill.getStatus().trim().equals("manager")){
+            if(bill.getStatus().trim().equals("onReview")){
                 managerBills.add(bill);
             }
         }
@@ -63,7 +63,7 @@ public class ManagerController {
         ArrayList<Billboard> notManagerBills=new ArrayList<>();
         for (Billboard bill:
                 billboards) {
-            if(!bill.getStatus().trim().equals("manager")){
+            if(!bill.getStatus().trim().equals("onReview")){
                 notManagerBills.add(bill);
             }
         }
