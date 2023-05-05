@@ -1,0 +1,37 @@
+.accept_block {
+  background-color: green;
+  width: 165px;
+  height: 57px;
+  border-top-right-radius: 24px;
+  color: white;
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.reject_block {
+  background-color: red;
+  width: 165px;
+  height: 57px;
+  border-bottom-right-radius: 24px;
+  color: white;
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 22px;
+}
+
+.ul_li_top ul li:nth-child(6) {
+  margin: 0px;
+}
+
+.ul_li_bottom ul li:nth-child(6) {
+  margin: 0px;
+}
+
+button {
+  border: 1px solid white;
+}

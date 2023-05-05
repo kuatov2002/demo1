@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Billboard Usage System</title>
+    <link rel="shortcut icon" href="../pics/ico/icon.ico" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+      crossorigin="anonymous"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" type="text/css" href="css/manager.css" />
+    <link rel="stylesheet" type="text/css" href="css/request.css" />
+    <script type="text/javascript" src="../js/main.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <nav
+        class="navbar navbar-expand-lg navbar-dark fixed-top"
+        style="background-color: black"
+      >
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">
+            <img src="../pics/ico/icon.ico" alt="logo" width="50" />
+          </a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" href="#">Requests</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="orders">Orders</a>
+              </li>
+            </ul>
+            <a class="delete_border" href="profile"
+              ><img src="../pics/svg/user.svg" alt="user"
+            /></a>
+
+            <a href="signin" class="btn text-dark" type="submit">
+              Sign Out
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <div class="middle">
+      <div class="orders_text">
+        <h1><b>REQUESTS</b></h1>
+      </div>
+      <div class="main">
+        <ul>
+
+        <form th:each="bill:${managerBills}" action="/request" method="post">
+
+          <h6 class="name_person" th:text="${bill.getClientName()}"></h6>
+          <li class="label">
+            <div class="ul_li_top">
+              <ul>
+                <li>TYPE</li>
+                <li>LOCATION</li>
+                <li>PRICE</li>
+                <li>START DATE</li>
+                <li>FINISH DATE</li>
+                <li>
+                  <input th:value="${bill.getId()}" name="id" type="hidden">
+                  <button
+                    type="submit"
+
+                    class="accept_block"
+                    name="button" value="accept"
+                  >
+                    ACCEPT
+                  </button>
+                </li>
+              </ul>
+            </div>
+
+            <div class="ul_li_bottom">
+              <ul>
+                <li>
+                  <p>DIGITAL</p>
+                </li>
+                <li>
+                  <p th:text="${bill.getAddress()}"></p>
+                </li>
+                <li>
+                  <p th:text="${bill.getPrice()}+'$'"></p>
+                </li>
+                <li>
+                  <p th:text="${bill.startDate1}">16.04.2023</p>
+                </li>
+                <li>
+                  <p th:text="${bill.endDate1}"></p>
+                </li>
+                <li>
+                  <button
+                    type="submit"
+
+                    class="reject_block"
+                    name="button" value="reject"
+                  >
+                    REJECT
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </li>
+          
+        </form>
+
+
+          </li>
+        </ul>
+      </div>
+    </div>
+  </body>
+</html>
