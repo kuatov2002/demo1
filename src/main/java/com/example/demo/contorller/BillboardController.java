@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,11 +27,13 @@ public class BillboardController {
     private BillboardRepo billboardRepo;
     @Autowired
     private PrototypeRepo prototypeRepo;
+    @Autowired
+    HttpSession session;
     @GetMapping("/pricing")
     public String Zakaz() {
         return "pricing";
     }
-    String type="";
+    String type="small";
     @PostMapping("/pricing")
     public String goToBuy(@RequestParam String type){
         this.type=type;
@@ -41,31 +44,31 @@ public class BillboardController {
     public String Bulletin(Model model) {
         Iterable<Billboard> billboards = billboardRepo.findAll();
         Iterable<Prototype> prototypes = prototypeRepo.findAll();
-
+//        prototypeRepo.deleteAll();
         // Очищаем списки объявлений у каждого прототипа перед заполнением
-        for (Prototype proto : prototypes) {
-            proto.getList().clear();
-        }
-        ArrayList<Prototype> prot=new ArrayList<>();
+//        for (Prototype proto : prototypes) {
+//            proto.getList().clear();
+//        }
+        ArrayList<Prototype> prototypesInSite=new ArrayList<>();
         for (Prototype proto:
                 prototypes) {
             if (proto.type.equals(type)){
-                prot.add(proto);
+                prototypesInSite.add(proto);
             }
         }
         // Заполняем списки объявлений по адресам
         for (Billboard billboard : billboards) {
             String address = billboard.getAddress();
-            for (Prototype proto1 : prot) {
-                if (proto1.Address.equals(address)&&!billboard.getStatus().equals("reject")) {
-                    proto1.getList().add(billboard);
+            for (Prototype prototype : prototypesInSite) {
+                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address)&&!billboard.getStatus().equals("reject")) {
+                    prototype.getList().add(billboard);
                     break;
                 }
             }
         }
 
         model.addAttribute("billboards", billboards);
-        model.addAttribute("prototypes", prot);
+        model.addAttribute("prototypes", prototypesInSite);
 
         return "map";
     }
@@ -78,13 +81,13 @@ public class BillboardController {
                          @RequestParam Long proId,
                          @RequestParam String start,
                          @RequestParam String end,
-                         HttpSession session,
+
                          Model model) {
-        if (start.length()==0||start.length()==0){
+        if (start.length()==0||end.length()==0){
             session.setAttribute("errorMessage","Error: fill in all fields");
             return "redirect:/bulletin";
         }
-
+        System.out.println(session.getAttribute("prototypes"));
         LocalDate startDate = LocalDate.of(Integer.valueOf(start.substring(0,4)), Integer.valueOf(start.substring(5,7)), 1);
         LocalDate endDate = LocalDate.of(Integer.valueOf(end.substring(0,4)), Integer.valueOf(end.substring(5,7)), 1);
         if (endDate.isBefore(startDate)){
@@ -96,29 +99,49 @@ public class BillboardController {
             session.setAttribute("errorMessage","Start date must be after current date");
             return "redirect:/bulletin";
         }
+        Iterable<Billboard> billboards = billboardRepo.findAll();
+        Iterable<Prototype> prototypes = prototypeRepo.findAll();
+        ArrayList<Prototype> prototypesInSite=new ArrayList<>();
+        for (Prototype proto:
+                prototypes) {
+            if (proto.type.equals(type)){
+                prototypesInSite.add(proto);
+            }
+        }
+        // Заполняем списки объявлений по адресам
+        for (Billboard billboard : billboards) {
+            String address1 = billboard.getAddress();
+            for (Prototype prototype : prototypesInSite) {
+                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address1)&&!billboard.getStatus().equals("reject")) {
+                    prototype.getList().add(billboard);
+                    break;
+                }
+            }
+        }
 
 
 
 
 
         session.setAttribute("errorMessage","");
-        Iterable<Billboard> billboards = billboardRepo.findAll();
-        Iterable<Prototype> prototypes = prototypeRepo.findAll();
 
         Optional<Prototype> prototypeOptional = prototypeRepo.findById(proId);
         Prototype prototype = prototypeOptional.get();
 
         for (Billboard bill:
-             prototype.list) {
-            System.out.println(bill.getEndDate1()+" "+bill.getStartDate1());
-            if((startDate.isAfter(bill.getStartDate1())&&startDate.isBefore(bill.getEndDate1()))||(endDate.isAfter(bill.getStartDate1())&&endDate.isBefore(bill.getEndDate1()))){
+            prototype.list) {
+//                System.out.println(startDate.isEqual(bill.getStartDate1()));
+                if(endDate.isEqual(bill.getEndDate1())||(startDate.isEqual(bill.getStartDate1())||(startDate.isAfter(bill.getStartDate1())&&startDate.isBefore(bill.getEndDate1()))||(endDate.isAfter(bill.getStartDate1())&&endDate.isBefore(bill.getEndDate1())))){
                 session.setAttribute("errorMessage","Your range intersects with another");
                 return "redirect:/bulletin";
             }
         }
-
-        if (prototype.list.size() >= 3) {
-//            model.addAttribute("errorMessage", "Maximum number of seats reserved");
+        long monthsBetween = ChronoUnit.MONTHS.between(
+                LocalDate.parse("2016-08-31").withDayOfMonth(1),
+                LocalDate.parse("2016-11-30").withDayOfMonth(1));
+        System.out.println(monthsBetween);
+        if (prototype.list.size() >= 11) {
+            model.addAttribute("errorMessage", "Maximum number of seats reserved");
         } else {
             // Create a new billboard and add it to the prototype
             String status = "onReview";
@@ -131,7 +154,8 @@ public class BillboardController {
 
         // Get the count of billboards that are in work and have the status "online"
 //        String status = "o";
-
+        System.out.println(prototype.getList().toString());
+        System.out.println(prototypesInSite.get(0).getList().toString());
         return "redirect:/bulletin";
     }
 
