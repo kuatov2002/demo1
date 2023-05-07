@@ -22,9 +22,17 @@ public class BillboardService {
     public BillboardService(BillboardRepo billboardRepo) {
         this.billboardRepo = billboardRepo;
     }
-    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "* * * * * *")
     public void updateExpiredStatus() {
-        System.out.println("My scheduled task is running...");
-        logger.info("Scheduled method started...");
+        Iterable<Billboard> billboards = billboardRepo.findAll();
+        LocalDate currentDate = LocalDate.now();
+
+        for (Billboard billboard : billboards) {
+            if (billboard.getEndDate1().isBefore(currentDate)) {
+                billboard.setStatus("expired");
+                billboardRepo.save(billboard);
+                logger.info("Billboard {} expired", billboard.getId());
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.example.demo.Repo.PrototypeRepo;
 import com.example.demo.models.Billboard;
 import com.example.demo.models.Prototype;
 import com.example.demo.models.User;
+import com.example.demo.service.BillboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -28,7 +29,9 @@ public class BillboardController {
     @Autowired
     private PrototypeRepo prototypeRepo;
     @Autowired
-    HttpSession session;
+    private HttpSession session;
+    @Autowired
+    private BillboardService billboardService;
     @GetMapping("/pricing")
     public String Zakaz() {
         return "pricing";
@@ -42,6 +45,7 @@ public class BillboardController {
 
     @GetMapping("/bulletin")
     public String Bulletin(Model model) {
+        billboardService.updateExpiredStatus();
         Iterable<Billboard> billboards = billboardRepo.findAll();
         Iterable<Prototype> prototypes = prototypeRepo.findAll();
 //        prototypeRepo.deleteAll();
@@ -60,7 +64,7 @@ public class BillboardController {
         for (Billboard billboard : billboards) {
             String address = billboard.getAddress();
             for (Prototype prototype : prototypesInSite) {
-                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address)&&!billboard.getStatus().equals("reject")) {
+                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address)&&!billboard.getStatus().equals("reject")&&!billboard.getStatus().equals("expired")) {
                     prototype.getList().add(billboard);
                     break;
                 }
@@ -99,6 +103,17 @@ public class BillboardController {
             session.setAttribute("errorMessage","Start date must be after current date");
             return "redirect:/bulletin";
         }
+        long monthsBetween = ChronoUnit.MONTHS.between(
+                startDate,
+                endDate);
+        if (monthsBetween>12){
+            session.setAttribute("errorMessage","Много выбрал");
+            return "redirect:/bulletin";
+        }
+        if (endDate.isAfter(LocalDate.now().plusMonths(13))){
+            session.setAttribute("errorMessage","кароче не выделывайся через год нельязя");
+            return "redirect:/bulletin";
+        }
         Iterable<Billboard> billboards = billboardRepo.findAll();
         Iterable<Prototype> prototypes = prototypeRepo.findAll();
         ArrayList<Prototype> prototypesInSite=new ArrayList<>();
@@ -112,7 +127,7 @@ public class BillboardController {
         for (Billboard billboard : billboards) {
             String address1 = billboard.getAddress();
             for (Prototype prototype : prototypesInSite) {
-                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address1)&&!billboard.getStatus().equals("reject")) {
+                if (!prototype.getList().contains(billboard)&&prototype.Address.equals(address1)&&!billboard.getStatus().equals("reject")&&!billboard.getStatus().equals("expired")) {
                     prototype.getList().add(billboard);
                     break;
                 }
@@ -123,7 +138,7 @@ public class BillboardController {
 
 
 
-        session.setAttribute("errorMessage","");
+
 
         Optional<Prototype> prototypeOptional = prototypeRepo.findById(proId);
         Prototype prototype = prototypeOptional.get();
@@ -136,10 +151,7 @@ public class BillboardController {
                 return "redirect:/bulletin";
             }
         }
-        long monthsBetween = ChronoUnit.MONTHS.between(
-                LocalDate.parse("2016-08-31").withDayOfMonth(1),
-                LocalDate.parse("2016-11-30").withDayOfMonth(1));
-        System.out.println(monthsBetween);
+
         if (prototype.list.size() >= 11) {
             model.addAttribute("errorMessage", "Maximum number of seats reserved");
         } else {
@@ -156,6 +168,7 @@ public class BillboardController {
 //        String status = "o";
         System.out.println(prototype.getList().toString());
         System.out.println(prototypesInSite.get(0).getList().toString());
+        session.setAttribute("errorMessage","");
         return "redirect:/bulletin";
     }
 
