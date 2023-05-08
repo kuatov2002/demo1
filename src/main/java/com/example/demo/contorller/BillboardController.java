@@ -83,6 +83,7 @@ public class BillboardController {
                          @RequestParam String address,
                          @RequestParam String price,
                          @RequestParam Long proId,
+                         @RequestParam String type,
                          @RequestParam String start,
                          @RequestParam String end,
 
@@ -159,6 +160,7 @@ public class BillboardController {
             String status = "onReview";
             boolean inWork = true;
             Billboard billboard = new Billboard(address, price, status, startDate, endDate, user, inWork);
+            billboard.setType(type);
             billboardRepo.save(billboard);
             prototype.list.add(billboard);
             prototypeRepo.save(prototype);

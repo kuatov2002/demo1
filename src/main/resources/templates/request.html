@@ -34,12 +34,12 @@
               <a class="nav-link active" href="#">Requests</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="orders.html">Orders</a>
+              <a class="nav-link" href="orders">Orders</a>
             </li>
           </ul>
-          <a class="delete_border" href="profile.html"><img src="../pics/svg/user.svg" alt="user" /></a>
+          <a class="delete_border" href="profile"><img src="pics/svg/user.svg" alt="user" /></a>
 
-          <a href="signin.html" class="btn text-dark" type="submit">
+          <a href="signin" class="btn text-dark" type="submit">
             Sign Out
           </a>
         </div>
@@ -73,7 +73,7 @@
             <div class="ul_li_bottom">
               <ul>
                 <li>
-                  <p th:text="${bill.getType()}">Small</p>
+                  <p th:text="${bill.getType().toUpperCase()}">Small</p>
                 </li>
                 <li>
                   <input type="hidden" th:value="${bill.getId()}" name="id" />
@@ -115,7 +115,7 @@
               <div class="modal-content" style="height: 150px">
                 <p>Are you sure that you gonna reject this?</p>
                 <div class="modal_button">
-                  <button type="submit" class="green_button" name="status" value="reject">
+                  <button type="submit" class="green_button" name="button" value="reject">
                     Yes
                   </button>
                   <button type="button" class="red_button2">No</button>
@@ -128,4 +128,59 @@
     </div>
   </div>
   </body>
+<script>
+  let modal = document.getElementById("myModal");
+  let modal2 = document.getElementById("myModal2");
+  let btn = document.getElementById("myBtn");
+  let btn2 = document.getElementById("myBtn2");
+  let span = document.getElementsByClassName("red_button")[0];
+  let span2 = document.getElementsByClassName("red_button2")[0];
+
+  btn.onclick = function () {
+    modal.style.display = "block";
+    document.body.classList.add("modal_opened");
+    document.body.insertAdjacentHTML(
+            "beforeend",
+            '<div class="site_overlay"></div>'
+    );
+  };
+
+  span.onclick = function () {
+    modal.style.display = "none";
+    document.body.classList.remove("modal_opened");
+    document.querySelector(".site_overlay").remove();
+  };
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+      document.body.classList.remove("modal_opened");
+      document.querySelector(".site_overlay").remove();
+    }
+  };
+
+  btn2.onclick = function () {
+    modal2.style.display = "block";
+    document.body.classList.add("modal_opened");
+    document.body.insertAdjacentHTML(
+            "beforeend",
+            '<div class="site_overlay"></div>'
+    );
+  };
+
+  span2.onclick = function () {
+    modal2.style.display = "none";
+    document.body.classList.remove("modal_opened");
+    document.querySelector(".site_overlay").remove();
+  };
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal2.style.display = "none";
+      document.body.classList.remove("modal_opened");
+      document.querySelector(".site_overlay").remove();
+    }
+  };
+</script>
+
 </html>
