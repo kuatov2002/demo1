@@ -4,6 +4,7 @@ import com.example.demo.Repo.BillboardRepo;
 import com.example.demo.Repo.UserRepo;
 import com.example.demo.models.Billboard;
 import com.example.demo.models.User;
+import com.example.demo.service.BillboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,6 +25,10 @@ public class ManagerController {
     private UserRepo userRepo;
     @Autowired
     BillboardRepo billboardRepo;
+    @Autowired
+    private BillboardService billboardService;
+
+
     @GetMapping("/users")
     public String managerPage(Model model,Authentication authentication){
         List<User> users = userRepo.findAll();
@@ -32,6 +37,7 @@ public class ManagerController {
     }
     @GetMapping("/request")
     public String Request(Model model){
+        billboardService.updateExpiredStatus();
         Iterable<Billboard> billboards=billboardRepo.findAll();
         ArrayList<Billboard> managerBills=new ArrayList<>();
         for (Billboard bill:
@@ -59,6 +65,7 @@ public class ManagerController {
 
     @GetMapping("/orders")
     public String Orders(Model model){
+        billboardService.updateExpiredStatus();
         Iterable<Billboard> billboards=billboardRepo.findAll();
         ArrayList<Billboard> notManagerBills=new ArrayList<>();
         for (Billboard bill:
